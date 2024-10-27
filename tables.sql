@@ -8,3 +8,115 @@ CREATE TABLE users
      email VARCHAR(50) NOT NULL
 );
 
+CREATE TABLE photos (
+    photo_id NUMBER PRIMARY KEY,
+    photo_url VARCHAR2(255) NOT NULL,
+    post_id NUMBER NOT NULL,
+    created_at TIMESTAMP DEFAULT SYSTIMESTAMP,
+    photo_size NUMBER(5, 2) CHECK (photo_size < 5)
+);
+
+
+CREATE TABLE videos (
+  video_id NUMBER PRIMARY KEY,
+  video_url VARCHAR(255) NOT NULL,
+  post_id NUMBER NOT NULL,
+   created_at TIMESTAMP DEFAULT SYSTIMESTAMP,
+  video_size NUMBER(5,2) CHECK (video_size<10)
+  );
+
+
+  CREATE TABLE post (
+	post_id NUMBER  PRIMARY KEY,
+    photo_id NUMBER,
+    video_id NUMBER,
+    user_id NUMBER NOT NULL,
+    caption VARCHAR(200), 
+    user_location VARCHAR(50),
+    created_at TIMESTAMP DEFAULT SYSTIMESTAMP,
+    FOREIGN KEY(user_id) REFERENCES users(user_id),
+	FOREIGN KEY(photo_id) REFERENCES photos(photo_id),
+    FOREIGN KEY(video_id) REFERENCES videos(video_id)
+);
+
+CREATE TABLE comments (
+    comment_id NUMBER  PRIMARY KEY,
+    comment_text VARCHAR(255) NOT NULL,
+    post_id NUMBER NOT NULL,
+    user_id NUMBER NOT NULL,
+    created_at TIMESTAMP DEFAULT SYSTIMESTAMP,
+    FOREIGN KEY(post_id) REFERENCES post(post_id),
+    FOREIGN KEY(user_id) REFERENCES users(user_id)
+);
+
+
+CREATE TABLE post_likes (
+    user_id NUMBER NOT NULL,
+    post_id NUMBER NOT NULL,
+    created_at TIMESTAMP DEFAULT SYSTIMESTAMP,
+    FOREIGN KEY(user_id) REFERENCES users(user_id),
+    FOREIGN KEY(post_id) REFERENCES post(post_id),
+    PRIMARY KEY(user_id, post_id)
+);
+
+CREATE TABLE comment_likes (
+    user_id NUMBER NOT NULL,
+    comment_id NUMBER NOT NULL,
+    created_at TIMESTAMP DEFAULT SYSTIMESTAMP,
+    FOREIGN KEY(user_id) REFERENCES users(user_id),
+    FOREIGN KEY(comment_id) REFERENCES comments(comment_id),
+    PRIMARY KEY(user_id, comment_id)
+);
+
+CREATE TABLE follows (
+    follower_id NUMBER NOT NULL,
+    following_id NUMBER NOT NULL,
+    created_at TIMESTAMP DEFAULT SYSTIMESTAMP,
+    FOREIGN KEY(follower_id) REFERENCES users(user_id),
+    FOREIGN KEY(following_id) REFERENCES users(user_id),
+    PRIMARY KEY(follower_id, following_id)
+);
+
+
+CREATE TABLE hastags (
+    hashtag_id  NUMBER PRIMARY KEY,
+    hashtag_name VARCHAR(255) UNIQUE NOT NULL,
+    created_at TIMESTAMP DEFAULT SYSTIMESTAMP
+);
+
+CREATE TABLE hastag_follow (
+    user_id NUMBER NOT NULL,
+    hashtag_id NUMBER NOT NULL,
+    created_at TIMESTAMP DEFAULT SYSTIMESTAMP,
+    FOREIGN KEY(user_id) REFERENCES users(user_id),
+    FOREIGN KEY(hashtag_id) REFERENCES hastags(hashtag_id),
+    PRIMARY KEY(user_id, hashtag_id)
+);
+
+CREATE TABLE post_tags (
+    post_id NUMBER NOT NULL,
+    hashtag_id NUMBER NOT NULL,
+    created_at TIMESTAMP DEFAULT SYSTIMESTAMP,
+    FOREIGN KEY(post_id) REFERENCES post(post_id),
+    FOREIGN KEY(hashtag_id) REFERENCES hastags(hashtag_id),
+    PRIMARY KEY(post_id, hashtag_id)
+);
+
+
+CREATE TABLE BOOKMARKS (
+    user_id NUMBER NOT NULL,
+    post_id NUMBER NOT NULL,
+    created_at TIMESTAMP DEFAULT SYSTIMESTAMP,
+    FOREIGN KEY(user_id) REFERENCES users(user_id),
+    FOREIGN KEY(post_id) REFERENCES post(post_id),
+    PRIMARY KEY(user_id, post_id)
+);
+
+CREATE TABLE login (
+    login_id NUMBER  PRIMARY KEY,
+    user_id NUMBER NOT NULL,
+    ip VARCHAR2(50) NOT NULL,
+    password VARCHAR2(255) NOT NULL,
+    login_time TIMESTAMP DEFAULT SYSTIMESTAMP,
+    FOREIGN KEY(user_id) REFERENCES users(user_id)
+);
