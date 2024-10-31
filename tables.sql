@@ -120,3 +120,4 @@ CREATE TABLE login (
     login_time TIMESTAMP DEFAULT SYSTIMESTAMP,
     FOREIGN KEY(user_id) REFERENCES users(user_id)
 );
+
