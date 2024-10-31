@@ -8,12 +8,24 @@ CREATE TABLE users
      email VARCHAR(50) NOT NULL
 );
 
+
+  CREATE TABLE post (
+	post_id NUMBER  PRIMARY KEY,
+    user_id NUMBER NOT NULL,
+    caption VARCHAR(200), 
+    user_location VARCHAR(50),
+    created_at TIMESTAMP DEFAULT SYSTIMESTAMP,
+    FOREIGN KEY(user_id) REFERENCES users(user_id),
+);
+
+
 CREATE TABLE photos (
     photo_id NUMBER PRIMARY KEY,
     photo_url VARCHAR2(255) NOT NULL,
     post_id NUMBER NOT NULL,
     created_at TIMESTAMP DEFAULT SYSTIMESTAMP,
-    photo_size NUMBER(5, 2) CHECK (photo_size < 5)
+    photo_size NUMBER(5, 2) CHECK (photo_size < 5),
+    FOREIGN KEY(post_id) REFERENCES post(post_id)
 );
 
 
@@ -23,21 +35,10 @@ CREATE TABLE videos (
   post_id NUMBER NOT NULL,
    created_at TIMESTAMP DEFAULT SYSTIMESTAMP,
   video_size NUMBER(5,2) CHECK (video_size<10)
-  );
+  FOREIGN KEY(post_id) REFERENCES post(post_id)
 
-
-  CREATE TABLE post (
-	post_id NUMBER  PRIMARY KEY,
-    photo_id NUMBER,
-    video_id NUMBER,
-    user_id NUMBER NOT NULL,
-    caption VARCHAR(200), 
-    user_location VARCHAR(50),
-    created_at TIMESTAMP DEFAULT SYSTIMESTAMP,
-    FOREIGN KEY(user_id) REFERENCES users(user_id),
-	FOREIGN KEY(photo_id) REFERENCES photos(photo_id),
-    FOREIGN KEY(video_id) REFERENCES videos(video_id)
 );
+
 
 CREATE TABLE comments (
     comment_id NUMBER  PRIMARY KEY,
@@ -70,15 +71,15 @@ CREATE TABLE comment_likes (
 
 CREATE TABLE follows (
     follower_id NUMBER NOT NULL,
-    following_id NUMBER NOT NULL,
+    followee_id NUMBER NOT NULL,
     created_at TIMESTAMP DEFAULT SYSTIMESTAMP,
     FOREIGN KEY(follower_id) REFERENCES users(user_id),
-    FOREIGN KEY(following_id) REFERENCES users(user_id),
-    PRIMARY KEY(follower_id, following_id)
+    FOREIGN KEY(followee_id) REFERENCES users(user_id),
+    PRIMARY KEY(follower_id, followee_id)
 );
 
 
-CREATE TABLE hastags (
+CREATE TABLE hashtags (
     hashtag_id  NUMBER PRIMARY KEY,
     hashtag_name VARCHAR(255) UNIQUE NOT NULL,
     created_at TIMESTAMP DEFAULT SYSTIMESTAMP
@@ -89,7 +90,7 @@ CREATE TABLE hastag_follow (
     hashtag_id NUMBER NOT NULL,
     created_at TIMESTAMP DEFAULT SYSTIMESTAMP,
     FOREIGN KEY(user_id) REFERENCES users(user_id),
-    FOREIGN KEY(hashtag_id) REFERENCES hastags(hashtag_id),
+    FOREIGN KEY(hashtag_id) REFERENCES hashtags(hashtag_id),
     PRIMARY KEY(user_id, hashtag_id)
 );
 
@@ -98,18 +99,8 @@ CREATE TABLE post_tags (
     hashtag_id NUMBER NOT NULL,
     created_at TIMESTAMP DEFAULT SYSTIMESTAMP,
     FOREIGN KEY(post_id) REFERENCES post(post_id),
-    FOREIGN KEY(hashtag_id) REFERENCES hastags(hashtag_id),
+    FOREIGN KEY(hashtag_id) REFERENCES hashtags(hashtag_id),
     PRIMARY KEY(post_id, hashtag_id)
-);
-
-
-CREATE TABLE BOOKMARKS (
-    user_id NUMBER NOT NULL,
-    post_id NUMBER NOT NULL,
-    created_at TIMESTAMP DEFAULT SYSTIMESTAMP,
-    FOREIGN KEY(user_id) REFERENCES users(user_id),
-    FOREIGN KEY(post_id) REFERENCES post(post_id),
-    PRIMARY KEY(user_id, post_id)
 );
 
 CREATE TABLE login (
@@ -120,4 +111,6 @@ CREATE TABLE login (
     login_time TIMESTAMP DEFAULT SYSTIMESTAMP,
     FOREIGN KEY(user_id) REFERENCES users(user_id)
 );
+
+
 
