@@ -1,3 +1,25 @@
+--Create a new login entries
+
+CREATE OR REPLACE PROCEDURE create_new_login(
+    email_in IN VARCHAR(255),
+    password_in IN VARCHAR(255),
+    login_id_out OUT NUMBER
+)
+IS
+    user_id_int NUMBER;
+BEGIN
+    SELECT user_id INTO user_id_int
+    FROM users
+    WHERE email = email_in AND password = password_in;
+
+    INSERT INTO login(user_id)
+    VALUES(user_id_int)
+    RETURNING login_id INTO login_id_out;
+
+END;
+
+
+
 --Create a new user
 
 CREATE OR REPLACE PROCEDURE create_new_user(
@@ -15,10 +37,12 @@ BEGIN
     INSERT INTO users(name, email, bio)
     VALUES(name_in, email_in, bio_in)
     RETURNING user_id INTO user_id;
+    REFERENCES users(user_id)
 
-    INSERT INTO login(user_id, password)
-    VALUES(user_id, password_in)
+    INSERT INTO login(user_id)
+    VALUES(user_id)
     RETURNING login_id INTO login_id;
+
 
     DBMS_OUTPUT.PUT_LINE('User Created with ID: ' || user_id);
     user_id_out := user_id;
@@ -73,7 +97,7 @@ CREATE OR REPLACE PROCEDURE update_user_password(
 )
 IS
 BEGIN
-    UPDATE login
+    UPDATE users
     SET password = password_in
     WHERE user_id = user_id_in;
 
