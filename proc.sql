@@ -15,7 +15,6 @@ BEGIN
     INSERT INTO login(user_id)
     VALUES(user_id_int)
     RETURNING login_id INTO login_id_out;
-
 END;
 
 
@@ -178,10 +177,10 @@ BEGIN
     END LOOP;
 END;
 
--- Procedure to show user his feed based on the people he follows
+-- Procedure to show user his feed based on the people he follows return post_id, content, created_at,video_url,photo_url,location
 
 CREATE OR REPLACE PROCEDURE show_user_feed(
-    user_id_in IN NUMBER
+    user_id_in IN NUMBER,
 )
 IS
     post_id NUMBER;
@@ -198,6 +197,40 @@ BEGIN
         )
     )
     LOOP
+        FOR video IN (
+            SELECT video_url
+            FROM videos
+            WHERE post_id = post.post_id
+        )
+        LOOP
+            DBMS_OUTPUT.PUT_LINE('Post ID: ' || post.post_id);
+            DBMS_OUTPUT.PUT_LINE('Post Content: ' || post.content);
+            DBMS_OUTPUT.PUT_LINE('Post Created At: ' || post.created_at);
+            DBMS_OUTPUT.PUT_LINE('Video URL: ' || video.video_url);
+        END LOOP;
+        FOR photo IN (
+            SELECT photo_url
+            FROM photos
+            WHERE post_id = post.post_id
+        )
+        LOOP
+            DBMS_OUTPUT.PUT_LINE('Post ID: ' || post.post_id);
+            DBMS_OUTPUT.PUT_LINE('Post Content: ' || post.content);
+            DBMS_OUTPUT.PUT_LINE('Post Created At: ' || post.created_at);
+            DBMS_OUTPUT.PUT_LINE('Photo URL: ' || photo.photo_url);
+        END LOOP;
+
+        FOR location IN (
+            SELECT location
+            FROM post
+            WHERE post_id = post.post_id
+        )
+        LOOP
+            DBMS_OUTPUT.PUT_LINE('Post ID: ' || post.post_id);
+            DBMS_OUTPUT.PUT_LINE('Post Content: ' || post.content);
+            DBMS_OUTPUT.PUT_LINE('Post Created At: ' || post.created_at);
+            DBMS_OUTPUT.PUT_LINE('Location: ' || location.location);
+        END LOOP;
         DBMS_OUTPUT.PUT_LINE('Post ID: ' || post.post_id);
         DBMS_OUTPUT.PUT_LINE('Post Content: ' || post.content);
         DBMS_OUTPUT.PUT_LINE('Post Created At: ' || post.created_at);
@@ -271,6 +304,53 @@ BEGIN
 
     DBMS_OUTPUT.PUT_LINE('Post Created with ID: ' || post_id);
 END;
+
+--Procedure to show add a video to a post
+
+CREATE OR REPLACE PROCEDURE add_video_to_post(
+    post_id_in IN NUMBER,
+    video_url_in IN VARCHAR(255)
+)
+IS
+    video_id NUMBER;
+BEGIN
+    INSERT INTO videos(video_url, post_id)
+    VALUES(video_url_in, post_id_in)
+    RETURNING video_id INTO video_id;
+
+    DBMS_OUTPUT.PUT_LINE('Video Added with ID: ' || video_id);
+END;
+
+--Procedure to show add a photo to a post
+
+CREATE OR REPLACE PROCEDURE add_photo_to_post(
+    post_id_in IN NUMBER,
+    photo_url_in IN VARCHAR(255)
+)
+IS
+    photo_id NUMBER;
+BEGIN
+    INSERT INTO photos(photo_url, post_id)
+    VALUES(photo_url_in, post_id_in)
+    RETURNING photo_id INTO photo_id;
+
+    DBMS_OUTPUT.PUT_LINE('Photo Added with ID: ' || photo_id);
+END;
+
+--Procedure to show add a location to a post
+CREATE OR REPLACE PROCEDURE add_location_to_post(
+    post_id_in IN NUMBER,
+    location_in IN VARCHAR(255)
+)
+IS
+BEGIN
+    UPDATE post
+    SET location = location_in
+    WHERE post_id = post_id_in;
+
+    DBMS_OUTPUT.PUT_LINE('Location Added to Post');
+END;
+
 
 -- Procedure to show create a new comment on a post
 
@@ -423,12 +503,7 @@ BEGIN
     FOR post IN (
         SELECT post_id, content, created_at
         FROM post
-        WHERE user_id IN (
-            SELECT followee_id
-            FROM follows
-            WHERE follower_id = user_id_in
-        )
-        AND post_id IN (
+        WHERE post_id IN (
             SELECT post_id
             FROM post_tags
             WHERE hashtag_id = hashtag_id_in
