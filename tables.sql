@@ -8,12 +8,12 @@ CREATE TABLE users (
     email VARCHAR2(50) NOT NULL
 );
 
-  CREATE TABLE post (
+CREATE TABLE post (
     post_id NUMBER  PRIMARY KEY,
     user_id NUMBER NOT NULL,
     caption VARCHAR2(200), 
     created_at TIMESTAMP DEFAULT SYSTIMESTAMP,
-    FOREIGN KEY(user_id) REFERENCES users(user_id),
+    FOREIGN KEY(user_id) REFERENCES users(user_id)
 );
 
 CREATE TABLE photos (
