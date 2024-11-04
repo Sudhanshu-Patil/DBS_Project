@@ -129,6 +129,7 @@ BEGIN
         WHERE pt.post_id = post_id_in;
 END;
 /
+
 --Retrieve all users and pfp
 CREATE OR REPLACE PROCEDURE retrieve_all_users_and_pfp (
     users_cursor OUT SYS_REFCURSOR
@@ -136,8 +137,24 @@ CREATE OR REPLACE PROCEDURE retrieve_all_users_and_pfp (
 IS
 BEGIN
     OPEN users_cursor FOR
-        SELECT user_id, username, profile_photo_url,bio
+        SELECT user_id, username, profile_photo_url
         FROM users;
+END;
+/
+
+CREATE OR REPLACE PROCEDURE show_user_details(
+    user_id_in IN NUMBER,
+    user_cursor OUT SYS_REFCURSOR
+)
+IS
+BEGIN
+    OPEN user_cursor FOR
+        SELECT username, email, bio, created_at
+        FROM users
+        WHERE user_id = user_id_in;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('No user found with the specified ID.');
 END;
 /
 
@@ -149,17 +166,46 @@ CREATE OR REPLACE PROCEDURE retrieve_posts_by_followed_hashtags (
 )
 IS
 BEGIN
-    OPEN posts_cursor FOR
-        SELECT DISTINCT p.post_id, p.user_id, p.caption, p.created_at
+    OPEN post_cursor FOR
+        SELECT p.post_id, p.user_id, p.caption, p.created_at,
+               ph.photo_url, v.video_url, COUNT(pl.post_id) AS like_count,
+               u.username, u.profile_photo_url
         FROM post p
+        JOIN users u ON p.user_id = u.user_id
         JOIN post_tags pt ON p.post_id = pt.post_id
         JOIN hashtag_follow hf ON pt.hashtag_id = hf.hashtag_id
+        LEFT JOIN photos ph ON p.post_id = ph.post_id
+        LEFT JOIN videos v ON p.post_id = v.post_id
+        LEFT JOIN post_likes pl ON p.post_id = pl.post_id
         WHERE hf.user_id = user_id_in
+        GROUP BY p.post_id, p.user_id, p.caption, p.created_at,
+                 ph.photo_url, v.video_url, u.username, u.profile_photo_url
         ORDER BY p.created_at DESC;
 END;
 /
 
---comments and comment likes
--- Hash tags on a post
 --Add a comment
---Retrieve Posts by user liked by user
+CREATE OR REPLACE PROCEDURE add_comment (
+    user_id_in IN NUMBER,
+    post_id_in IN NUMBER,
+    comment_text_in IN VARCHAR2
+)
+IS
+BEGIN
+    INSERT INTO comments (comment_text, post_id, user_id)
+    VALUES (comment_text_in, post_id_in, user_id_in);
+END;
+--Retrieve USERS liking a post
+CREATE OR REPLACE PROCEDURE retrieve_users_liking_post (
+    post_id_in IN NUMBER,
+    users_cursor OUT SYS_REFCURSOR
+)
+IS
+BEGIN
+    OPEN users_cursor FOR
+        SELECT u.user_id, u.username, u.profile_photo_url
+        FROM users u
+        JOIN post_likes pl ON u.user_id = pl.user_id
+        WHERE pl.post_id = post_id_in;
+END;
+/
