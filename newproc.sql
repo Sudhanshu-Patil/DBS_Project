@@ -192,9 +192,16 @@ CREATE OR REPLACE PROCEDURE add_comment (
 )
 IS
 BEGIN
-    INSERT INTO comments (comment_text, post_id, user_id)
-    VALUES (comment_text_in, post_id_in, user_id_in);
+    INSERT INTO comments (comment_text, post_id, user_id, created_at)
+    VALUES (comment_text_in, post_id_in, user_id_in, SYSTIMESTAMP);
+
+    DBMS_OUTPUT.PUT_LINE('Comment added successfully.');
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('An error occurred while adding the comment: ' || SQLERRM);
 END;
+/
+
 --Retrieve USERS liking a post
 CREATE OR REPLACE PROCEDURE retrieve_users_liking_post (
     post_id_in IN NUMBER,
@@ -207,5 +214,14 @@ BEGIN
         FROM users u
         JOIN post_likes pl ON u.user_id = pl.user_id
         WHERE pl.post_id = post_id_in;
+
+    -- Optional message to indicate procedure completion
+    DBMS_OUTPUT.PUT_LINE('Retrieved users who liked the specified post.');
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('No users found who liked this post.');
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('An error occurred: ' || SQLERRM);
 END;
 /
+
