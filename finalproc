@@ -1,4 +1,5 @@
 --Create a new user
+
 CREATE OR REPLACE PROCEDURE create_new_user(
     name_in IN VARCHAR2,
     email_in IN VARCHAR2,
@@ -22,9 +23,10 @@ BEGIN
 
     COMMIT;
 END;
+/
 
 
-
+-- procedure to create a new login
 
 CREATE OR REPLACE PROCEDURE create_new_login(
     email_in IN VARCHAR2,
@@ -42,9 +44,11 @@ BEGIN
     VALUES(user_id_int)
     RETURNING user_id INTO user_id_out;
 END;
+/
 
 
 -- Retrieve all posts for a userfeed
+
 CREATE OR REPLACE PROCEDURE show_user_feed (
     user_id_in IN NUMBER,
     posts_cursor OUT SYS_REFCURSOR
@@ -69,7 +73,7 @@ END;
 /
 
 
---Procedure to show feed with his followed hashtags
+--Procedure to show feed with his/her followed hashtags
 
 CREATE OR REPLACE PROCEDURE show_user_feed_with_followed_hashtags(
     user_id_in IN NUMBER,
@@ -100,7 +104,9 @@ BEGIN
 END;
 /
 
---Retrieve all posts in his followed hashtags
+
+--Retrieve all posts in user followed hashtags
+
 CREATE OR REPLACE PROCEDURE retrieve_posts_by_followed_hashtags (
     user_id_in IN NUMBER,
     posts_cursor OUT SYS_REFCURSOR
@@ -123,11 +129,12 @@ BEGIN
                  ph.photo_url, v.video_url, u.username, u.profile_photo_url
         ORDER BY p.created_at DESC;
 END;
+/
 
 
 --POST DETAILS WITH COMMENTS
-
 --Retreive details of post
+
 CREATE OR REPLACE PROCEDURE show_post_details (
     post_id_in IN NUMBER,
     post_cursor OUT SYS_REFCURSOR
@@ -151,6 +158,7 @@ END;
 
 
 -- Retrieve all comments for a post with likes
+
 CREATE OR REPLACE PROCEDURE show_comments_for_post (
     post_id_in IN NUMBER,
     comments_cursor OUT SYS_REFCURSOR
@@ -171,7 +179,9 @@ BEGIN
 END;
 /
 
---PROCEDURE TO like a Post
+
+--PROCEDURE TO like a post
+
 CREATE OR REPLACE PROCEDURE like_post(
     post_id_in IN NUMBER,
     user_id_in IN NUMBER   
@@ -189,7 +199,8 @@ BEGIN
 END;
 /
 
--- Procedure to show  unlike on a post
+
+-- Procedure to show unlike on a post
 
 CREATE OR REPLACE PROCEDURE unlike_post(
     post_id_in IN NUMBER,
@@ -243,7 +254,9 @@ BEGIN
 END;
 /
 
+
 --Procedure to show add a comment to a post
+
 CREATE OR REPLACE PROCEDURE add_comment_to_post(
     post_id_in IN NUMBER,
     user_id_in IN NUMBER,    
@@ -260,10 +273,9 @@ BEGIN
 END;
 
 
-
 --PROFILE PAGE 
-
 --procedure to get user details
+
 CREATE OR REPLACE PROCEDURE show_user_info(
     user_id_in IN NUMBER,
     user_cursor OUT SYS_REFCURSOR
@@ -277,7 +289,9 @@ BEGIN
 END;
 /
 
+
 -- show user posts 
+
 CREATE OR REPLACE PROCEDURE show_user_posts(
     user_id_in IN NUMBER,
     post_cursor OUT SYS_REFCURSOR
@@ -298,14 +312,16 @@ BEGIN
 END;
 /
 
---procedure to show user his feed based on the hashtags he follows
+
+--procedure to show user his/her feed based on the hashtags he/she follows
+
 CREATE OR REPLACE PROCEDURE show_user_feed(
     user_id_in IN NUMBER,
     feed_cursor OUT SYS_REFCURSOR
 )
 
 
--- Procedure to show user his followers
+-- Procedure to show user his/her followers
 
 CREATE OR REPLACE PROCEDURE show_user_followers(
     user_id_in IN NUMBER,
@@ -324,7 +340,9 @@ BEGIN
 END;
 /
 
--- Procedure to show user his followees
+
+-- Procedure to show user his/her followees
+
 CREATE OR REPLACE PROCEDURE show_user_followees(
     user_id_in IN NUMBER,
     followees_cursor OUT SYS_REFCURSOR
@@ -343,8 +361,8 @@ END;
 /
 
 
+-- Procedure to get post details
 
--- Procedure to show user his followees???
 CREATE OR REPLACE PROCEDURE get_post_details(
     post_details_cursor OUT SYS_REFCURSOR
 ) 
@@ -371,7 +389,9 @@ BEGIN
 END;
 /
 
---procedure to show user liked post 
+
+--procedure to show user liked post
+
 CREATE OR REPLACE PROCEDURE show_user_liked_posts(
     user_id_in IN NUMBER,
     likedposts_cursor OUT SYS_REFCURSOR
@@ -400,7 +420,8 @@ BEGIN
 END;
 /
 
---Procedure to show user his followed hashtags
+
+--Procedure to show user his/her followed hashtags
 
 CREATE OR REPLACE PROCEDURE show_user_followed_hashtags(
     user_id_in IN NUMBER,
@@ -416,19 +437,21 @@ BEGIN
 END;
 /
 
+--Procedure to create a new post
+
 CREATE OR REPLACE PROCEDURE create_new_post(
     user_id_in IN NUMBER,
     caption_in IN VARCHAR2,
-    post_id_out OUT NUMBER
+    postid_out OUT NUMBER
 )
 IS
     post_id NUMBER;
 BEGIN
     INSERT INTO post(user_id, caption)
     VALUES(user_id_in, caption_in)
-    RETURNING post_id INTO post_id;
+    RETURNING post_id INTO postid_out;
 
-    DBMS_OUTPUT.PUT_LINE('Post Created with ID: ' || post_id);
+    DBMS_OUTPUT.PUT_LINE('Post Created with ID: ' || postid_out);
 END;
 /
 
@@ -466,7 +489,9 @@ BEGIN
 END;
 /
 
+
 --Procedure to show add a location to a post
+
 CREATE OR REPLACE PROCEDURE add_location_to_post(
     post_id_in IN NUMBER,
     location_in IN VARCHAR2
@@ -481,9 +506,8 @@ END;
 /
 
 
-
 --EXPLORE HASHTAGS PAGE
---Procedure to show user his not followed hashtags
+--Procedure to show user his/her not followed hashtags
 
 CREATE OR REPLACE PROCEDURE show_user_not_followed_hashtags(
     user_id_in IN NUMBER,
@@ -522,6 +546,8 @@ END;
 /
 
 
+-- Show all posts having a particular selected hashtag
+
 CREATE OR REPLACE PROCEDURE show_posts_for_hashtag(
     hashtag_id_in IN NUMBER,
     posts_cursor OUT SYS_REFCURSOR
@@ -544,5 +570,34 @@ END;
 /
 
 
+-- Procedure to update user details for a already created user
+
+CREATE OR REPLACE PROCEDURE update_user_profile(
+    user_id_in IN NUMBER,
+    username_in IN VARCHAR2,
+    bio_in IN VARCHAR2
+)
+IS
+BEGIN
+    UPDATE users
+    SET username = username_in, bio = bio_in
+    WHERE user_id = user_id_in;
+
+    COMMIT;
+END;
+/
 
 
+-- Procedure to add hashtags to post
+
+CREATE OR REPLACE PROCEDURE add_hashtag_to_post(
+    post_id_in IN NUMBER,
+    hashtag_name_in IN VARCHAR2
+) AS
+BEGIN
+    INSERT INTO post_tags (post_id, hashtag_id)
+    SELECT post_id_in, hashtag_id
+    FROM hashtags
+    WHERE hashtag_name = hashtag_name_in;
+END;
+/
