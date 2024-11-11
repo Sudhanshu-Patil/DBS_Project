@@ -260,7 +260,7 @@ END;
 CREATE OR REPLACE PROCEDURE add_comment_to_post(
     post_id_in IN NUMBER,
     user_id_in IN NUMBER,    
-    comment_text_in IN VARCHAR2
+    comment_text_in IN VARCHAR2,
     comments_cursor OUT SYS_REFCURSOR
 )
 IS
@@ -311,14 +311,6 @@ BEGIN
         GROUP BY p.post_id, p.user_id, p.caption, p.created_at, ph.photo_url, v.video_url, u.username, u.profile_photo_url;
 END;
 /
-
-
---procedure to show user his/her feed based on the hashtags he/she follows
-
-CREATE OR REPLACE PROCEDURE show_user_feed(
-    user_id_in IN NUMBER,
-    feed_cursor OUT SYS_REFCURSOR
-)
 
 
 -- Procedure to show user his/her followers
