@@ -313,14 +313,6 @@ END;
 /
 
 
---procedure to show user his/her feed based on the hashtags he/she follows
-
-CREATE OR REPLACE PROCEDURE show_user_feed(
-    user_id_in IN NUMBER,
-    feed_cursor OUT SYS_REFCURSOR
-)
-
-
 -- Procedure to show user his/her followers
 
 CREATE OR REPLACE PROCEDURE show_user_followers(
@@ -599,5 +591,24 @@ BEGIN
     SELECT post_id_in, hashtag_id
     FROM hashtags
     WHERE hashtag_name = hashtag_name_in;
+END;
+/
+
+-- Show list of all users not followed by a user
+CREATE OR REPLACE PROCEDURE show_users_not_followed(
+    user_id_in IN NUMBER,
+    users_cursor OUT SYS_REFCURSOR
+)
+IS
+BEGIN
+    OPEN users_cursor FOR
+        SELECT u.user_id, u.username, u.profile_photo_url, u.bio, u.created_at, u.email
+        FROM users u
+        WHERE u.user_id != user_id_in
+        AND u.user_id NOT IN (
+            SELECT f.followee_id
+            FROM follows f
+            WHERE f.follower_id = user_id_in
+        );
 END;
 /
